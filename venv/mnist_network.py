@@ -62,6 +62,9 @@ time_in_seconds = []
 #-----a for loop for testing inputs of different sizes in step 2000-----#
 
 for i in range(2):
+
+    y_test_temp = y_test
+
     model = Sequential()
 
     model.add(Dense(1024, input_shape=(128,)))
@@ -74,7 +77,7 @@ for i in range(2):
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
 
-    model.add(Dense(10, activation='softmax'))
+    model.add(Dense(num_classes, activation='softmax'))
 
     ad = adam(lr=0.00001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
 
@@ -91,13 +94,14 @@ for i in range(2):
 
     time_in_seconds.append(time.time() - start_time)
 
-    # score = model.evaluate(x_test, y_test, verbose=1)
+    score = model.evaluate(x_test, y_test, verbose=1)
 
     y_pred = model.predict(x_test)
-    y_test = np.argmax(y_test, axis=1)
+    print(y_test_temp.shape)
+    y_test_temp = np.argmax(y_test_temp, axis=1)
     y_pred = np.argmax(y_pred, axis=1)
 
-    accuracy.append(accuracy_score(y_test, y_pred))
+    accuracy.append(accuracy_score(y_test_temp, y_pred))
     n_value += 2000
 
 accuracy = np.asarray(accuracy)
@@ -105,6 +109,30 @@ pd.DataFrame(accuracy).to_csv('accuracyvsnMNIST.csv', header=None, index=False)
 time_in_seconds = np.asarray(time_in_seconds)
 pd.DataFrame(time_in_seconds).to_csv('timevsnMNIST.csv', header=None,index=False)
 print("Completed")
+
+#-----a single run on all images-----#
+
+# model = Sequential()
+# model.add(Dense(1024, input_shape=(128,)))
+# model.add(BatchNormalization())
+# model.add(Activation('relu'))
+# model.add(Dropout(0.5))
+#
+# model.add(Dense(512))
+# model.add(BatchNormalization())
+# model.add(Activation('relu'))
+# model.add(Dropout(0.5))
+#
+# model.add(Dense(num_classes, activation='softmax'))
+#
+# model.summary()
+#
+# ad = adam(lr=0.00001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+#
+# model.compile(loss='categorical_crossentropy',
+#               optimizer=ad,
+#               metrics=['accuracy'])
+
 
 #-----below is code for a single run that is plotted within tensorboard-----#
 
