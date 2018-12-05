@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
 
 from keras.datasets import mnist
 from keras.models import Sequential
@@ -52,14 +52,18 @@ print(x_test.shape[0], 'test samples')
 y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
 
+print(y_train.shape)
+print(y_test.shape)
+
 n_value = 2000
 accuracy = []
 time_in_seconds = []
 
-for i in range(20):
-    start_time = time.time()
+#-----a for loop for testing inputs of different sizes in step 2000-----#
+
+for i in range(2):
     model = Sequential()
-    model.fit(x_train[:n_value], y_train[:n_value].reshape(-1, ))
+
     model.add(Dense(1024, input_shape=(128,)))
     model.add(BatchNormalization())
     model.add(Activation('relu'))
@@ -70,9 +74,7 @@ for i in range(20):
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
 
-    model.add(Dense(num_classes, activation='softmax'))
-
-    model.summary()
+    model.add(Dense(10, activation='softmax'))
 
     ad = adam(lr=0.00001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
 
@@ -80,40 +82,56 @@ for i in range(20):
                   optimizer=ad,
                   metrics=['accuracy'])
 
+    start_time = time.time()
+    model.fit(x_train[:n_value], y_train[:n_value],
+              verbose=1,
+              epochs=100,
+              batch_size=128,
+              shuffle=True)
+
     time_in_seconds.append(time.time() - start_time)
+
+    # score = model.evaluate(x_test, y_test, verbose=1)
+
     y_pred = model.predict(x_test)
+    y_test = np.argmax(y_test, axis=1)
+    y_pred = np.argmax(y_pred, axis=1)
+
     accuracy.append(accuracy_score(y_test, y_pred))
     n_value += 2000
 
 accuracy = np.asarray(accuracy)
-pd.DataFrame(accuracy).to_csv('accuracy_of_model.csv', header=None, index=False)
+pd.DataFrame(accuracy).to_csv('accuracyvsnMNIST.csv', header=None, index=False)
 time_in_seconds = np.asarray(time_in_seconds)
-pd.DataFrame(time_in_seconds).to_csv('time_of_model.csv', header=None,index=False)
+pd.DataFrame(time_in_seconds).to_csv('timevsnMNIST.csv', header=None,index=False)
 print("Completed")
 
-from keras.callbacks import TensorBoard
-## in terminal: tensorboard --logdir=/tmp/mlp
-## then go to localhost:6006  in chrome
-## change log_dir to individual file names for each run.
-model.fit(x_train, y_train,
-        verbose=0,
-        epochs=100,
-        batch_size=128,
-        shuffle=True,
-        validation_data=(x_test, y_test),
-        callbacks=[TensorBoard(log_dir='/tmp/mlp/lr(.00001)_ep(100)', histogram_freq=0, batch_size=128, write_graph=True,
-                               write_grads=False, write_images=False, embeddings_freq=0,
-                               embeddings_layer_names=None, embeddings_metadata=None, embeddings_data=None,
-                               update_freq=10000)])
+#-----below is code for a single run that is plotted within tensorboard-----#
 
-score = model.evaluate(x_test, y_test, verbose=0)
+# from keras.callbacks import TensorBoard
+# ## in terminal: tensorboard --logdir=/tmp/mlp
+# ## then go to localhost:6006  in chrome
+# ## change log_dir to individual file names for each run.
+# model.fit(x_train, y_train,
+#         verbose=0,
+#         epochs=100,
+#         batch_size=128,
+#         shuffle=True,
+#         validation_data=(x_test, y_test),
+#         callbacks=[TensorBoard(log_dir='/tmp/mlp/lr(.00001)_ep(100)', histogram_freq=0, batch_size=128, write_graph=True,
+#                                write_grads=False, write_images=False, embeddings_freq=0,
+#                                embeddings_layer_names=None, embeddings_metadata=None, embeddings_data=None,
+#                                update_freq=10000)])
+#
+# score = model.evaluate(x_test, y_test, verbose=0)
 
-y_pred = model.predict(x_test)
-y_test = np.argmax(y_test, axis=1)
-y_pred = np.argmax(y_pred, axis=1)
-cm = confusion_matrix(y_test, y_pred)
+# y_pred = model.predict(x_test)
+# y_test = np.argmax(y_test, axis=1)
+# y_pred = np.argmax(y_pred, axis=1)
 
-print('Test loss:', score[0])
-print('Test accuracy:', score[1])
-print('Classifcation report:\n', classification_report(y_test, y_pred))
-print('Confusion matrix:\n', cm)
+# cm = confusion_matrix(y_test, y_pred)
+
+# print('Test loss:', score[0])
+# print('Test accuracy:', score[1])
+# print('Classifcation report:\n', classification_report(y_test, y_pred))
+# print('Confusion matrix:\n', cm)
