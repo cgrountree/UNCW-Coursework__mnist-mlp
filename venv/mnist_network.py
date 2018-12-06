@@ -61,7 +61,7 @@ time_in_seconds = []
 
 #-----a for loop for testing inputs of different sizes in step 2000-----#
 
-for i in range(2):
+for i in range(20):
 
     y_test_temp = y_test
 
@@ -152,13 +152,13 @@ print("Completed")
 #                                update_freq=10000)])
 #
 # score = model.evaluate(x_test, y_test, verbose=0)
-
+#
 # y_pred = model.predict(x_test)
 # y_test = np.argmax(y_test, axis=1)
 # y_pred = np.argmax(y_pred, axis=1)
-
+#
 # cm = confusion_matrix(y_test, y_pred)
-
+#
 # print('Test loss:', score[0])
 # print('Test accuracy:', score[1])
 # print('Classifcation report:\n', classification_report(y_test, y_pred))
